@@ -1,6 +1,0 @@
-/home/gustavovazquez/Faculdade/numerical-methods-II/T1/build/CMakeFiles/main.dir
-/home/gustavovazquez/Faculdade/numerical-methods-II/T1/build/CMakeFiles/edit_cache.dir
-/home/gustavovazquez/Faculdade/numerical-methods-II/T1/build/CMakeFiles/rebuild_cache.dir
-/home/gustavovazquez/Faculdade/numerical-methods-II/T1/build/function/CMakeFiles/function.dir
-/home/gustavovazquez/Faculdade/numerical-methods-II/T1/build/function/CMakeFiles/edit_cache.dir
-/home/gustavovazquez/Faculdade/numerical-methods-II/T1/build/function/CMakeFiles/rebuild_cache.dir
