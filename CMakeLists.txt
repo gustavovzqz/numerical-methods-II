@@ -1,4 +1,4 @@
 project(NumericalMethodsII)
 
 add_subdirectory(T1)
-add_subdirectory(T1.2/alg1)
+include_directories(${CMAKE_SOURCE_DIR}/third-party)
