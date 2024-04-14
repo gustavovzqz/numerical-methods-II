@@ -2,25 +2,27 @@
 #include <iomanip>
 #include <iostream>
 
-#include "function.h"
+#include "utils/function/function.h"
 
 const int MAX_ITER = 100;
 const double ERROR_PRECISION = 0.00001;
-const int x = 2;
 
 int main() {
-  Function f{0.5};
+  auto calculate_lambda = [](double x) {
+    return (sqrt(exp(3 * x) + 4 * pow(x, 2)));
+  };
+  Function f{0.5, calculate_lambda};
   double error = 10;  // Any amount > 0.000001
-  double past_second_derivative = f.SecondDerivative(x);
+  double past_second_derivative = f.SecondDerivative(2);
   int iter = 0;
   while (error > ERROR_PRECISION && iter < MAX_ITER) {
     f.dx = (f.dx / 2);
-    double second_derivative = f.SecondDerivative(x);
+    double second_derivative = f.SecondDerivative(2);
     error = fabs(
         ((second_derivative - past_second_derivative) / second_derivative));
     past_second_derivative = second_derivative;
     std::cout << "Iter: " << iter << " Delta: " << f.dx
-              << " f(x): " << f.Calculate(x) << " f''(x): " << std::fixed
+              << " f(x): " << f.Calculate(2) << " f''(x): " << std::fixed
               << second_derivative << " Error: " << error << '\n';
     ++iter;
   }

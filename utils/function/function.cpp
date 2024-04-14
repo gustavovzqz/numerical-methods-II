@@ -2,12 +2,10 @@
 
 #include <cmath>
 
-Function::Function(double dx) : dx{dx} {}
+Function::Function(double dx, std::function<double(double)> calculate_lambda)
+    : dx{dx}, calculate_{calculate_lambda} {}
 
-// Change this to change the function!
-double Function::Calculate(double x) {
-  return (sqrt(exp(3 * x) + 4 * pow(x, 2)));
-}
+double Function::Calculate(double x) { return calculate_(x); }
 
 double Function::SecondDerivative(double x) {
   return ((Calculate(x + dx) + Calculate(x - dx) + 5 * Calculate(x + 2 * dx) +
