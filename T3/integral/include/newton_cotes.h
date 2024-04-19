@@ -1,6 +1,6 @@
 #ifndef T3_INTEGRAL_INCLUDE_NEWTON_COTES_H
 #define T3_INTEGRAL_INCLUDE_NEWTON_COTES_H
-#include "utils/function/function.h"
+#include "utils/function/include/function.h"
 
 class NewtonCotes {
  public:

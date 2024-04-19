@@ -2,7 +2,7 @@
 #include <iomanip>
 #include <iostream>
 
-#include "utils/function/function.h"
+#include "utils/function/include/function.h"
 
 const int MAX_ITER = 100;
 const double ERROR_PRECISION = 0.00001;

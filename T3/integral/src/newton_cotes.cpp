@@ -1,4 +1,4 @@
-#include "newton_cotes.h"
+#include "T3/integral/include/newton_cotes.h"
 
 #include <functional>
 
