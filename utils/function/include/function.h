@@ -1,5 +1,5 @@
-#ifndef UTILS_FUNCTION_FUNCTION_H
-#define UTILS_FUNCTION_FUNCTION_H
+#ifndef UTILS_FUNCTION_INCLUDE_FUNCTION_H
+#define UTILS_FUNCTION_INCLUDE_FUNCTION_H
 #include <functional>
 
 struct Function {
