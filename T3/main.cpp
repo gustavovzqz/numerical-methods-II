@@ -12,7 +12,7 @@ int main() {
   auto function = [](double x) {
     return (pow(sin(2 * x) + 4 * pow(x, 2) + 3 * x, 2));
   };
-  // First argument is only necessary to calculate derivatives
+
   NewtonCotes newton{function, 0., 1.};
   // Function, a and b.
   {
