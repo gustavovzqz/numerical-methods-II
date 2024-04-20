@@ -2,7 +2,7 @@
 #include <iomanip>
 #include <iostream>
 
-#include "integral/include/newton_cotes.h"
+#include "utils/function/include/newton_cotes.h"
 
 const int MAX_ITER = 100;
 const double ERROR_PRECISION = 0.00001;
