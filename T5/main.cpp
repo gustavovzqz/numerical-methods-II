@@ -3,7 +3,6 @@
 #include <iostream>
 #include <vector>
 
-#include "utils/function/include/function.h"
 #include "utils/function/include/gauss_legendre.h"
 
 constexpr double kPrecision{0.000006};
