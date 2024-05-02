@@ -2,7 +2,6 @@
 
 #include <cmath>
 #include <functional>
-#include <iostream>
 
 NewtonCotes::NewtonCotes(std::function<double(double)> func, double start,
                          double end)
