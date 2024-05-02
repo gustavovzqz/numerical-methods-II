@@ -8,6 +8,7 @@ class NewtonCotes {
               double interval_end);
   double CalculateOpenIntegral(unsigned int partitions);
   double CalculateClosedIntegral(unsigned int partitions);
+  double CalculatePreciseIntegral(double precision);
 
  private:
   std::function<double(double)> function_;

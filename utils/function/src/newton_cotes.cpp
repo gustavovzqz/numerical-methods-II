@@ -1,6 +1,8 @@
 #include "utils/function/include/newton_cotes.h"
 
+#include <cmath>
 #include <functional>
+#include <iostream>
 
 NewtonCotes::NewtonCotes(std::function<double(double)> func, double start,
                          double end)
@@ -44,4 +46,18 @@ double NewtonCotes::CalculateClosedIntegral(unsigned int partitions) {
     s = s + ClosedFormula(xi, xf);
   }
   return s;
+}
+
+double NewtonCotes::CalculatePreciseIntegral(double precision) {
+  double error = 10;  // Any amount > 0.000001
+  double past_integration = CalculateClosedIntegral(1);
+  double number_of_partitions = 1;
+  double integration;
+  while (error > precision) {
+    number_of_partitions++;
+    integration = CalculateClosedIntegral(number_of_partitions);
+    error = fabs(((integration - past_integration) / integration));
+    past_integration = integration;
+  }
+  return past_integration;
 }
