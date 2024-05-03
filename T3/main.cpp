@@ -13,17 +13,18 @@ int main() {
     return (pow(sin(2 * x) + 4 * pow(x, 2) + 3 * x, 2));
   };
 
-  NewtonCotes newton{function, 0., 1.};
+  NewtonCotes newton{function};
   // Function, a and b.
   {
     std::cout << "Closed Integral Values:\n";
     double error = 10;  // Any amount > 0.000001
     double iter = 0;
-    double past_integration = newton.CalculateClosedIntegral(1);
+    double past_integration = newton.CalculateClosedIntegral(1, 0, 1);
     double number_of_partitions = 1;
     while (error > ERROR_PRECISION && iter < MAX_ITER) {
       number_of_partitions++;
-      double integration = newton.CalculateClosedIntegral(number_of_partitions);
+      double integration =
+          newton.CalculateClosedIntegral(number_of_partitions, 0, 1);
       error = fabs(((integration - past_integration) / integration));
       past_integration = integration;
       std::cout << std::setprecision(FLOAT_PRECISION) << "Iter: " << iter
@@ -37,11 +38,12 @@ int main() {
     std::cout << "Open Integral Values:\n";
     double error = 10;  // Any amount > 0.000001
     double iter = 0;
-    double past_integration = newton.CalculateOpenIntegral(1);
+    double past_integration = newton.CalculateOpenIntegral(1, 0, 1);
     double number_of_partitions = 1;
     while (error > ERROR_PRECISION && iter < MAX_ITER) {
       number_of_partitions++;
-      double integration = newton.CalculateOpenIntegral(number_of_partitions);
+      double integration =
+          newton.CalculateOpenIntegral(number_of_partitions, 0, 1);
       error = fabs(((integration - past_integration) / integration));
       past_integration = integration;
       std::cout << std::setprecision(FLOAT_PRECISION) << "Iter: " << iter

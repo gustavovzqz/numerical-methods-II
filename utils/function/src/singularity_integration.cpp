@@ -38,15 +38,15 @@ double SingularityIntegration::CalculatePreciseIntegral(
     double interval_precision, double inner_precision) {
   constexpr double kLimit{10000000};
   double c = 1;
-  NewtonCotes newton{function_, -c, c};
-  double past_integration = newton.CalculatePreciseIntegral(inner_precision);
+  NewtonCotes newton{function_};
+  double past_integration =
+      newton.CalculatePreciseIntegral(inner_precision, -c, c);
 
   double error = 10;
   double integration;
   while (error > interval_precision) {
-    c *= 1.01;
-    newton = NewtonCotes{function_, -c, +c};
-    integration = newton.CalculatePreciseIntegral(inner_precision);
+    c *= 1.1;
+    integration = newton.CalculatePreciseIntegral(inner_precision, -c, c);
     if (integration < -kLimit || integration > kLimit) {
       return past_integration;
     }

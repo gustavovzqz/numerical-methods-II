@@ -4,16 +4,16 @@
 
 class NewtonCotes {
  public:
-  NewtonCotes(std::function<double(double)> function, double interval_start,
-              double interval_end);
-  double CalculateOpenIntegral(unsigned int partitions);
-  double CalculateClosedIntegral(unsigned int partitions);
-  double CalculatePreciseIntegral(double precision);
+  NewtonCotes(std::function<double(double)> function);
+  double CalculateOpenIntegral(unsigned int partitions, double interval_start_,
+                               double interval_end_);
+  double CalculateClosedIntegral(unsigned int partitions,
+                                 double interval_start_, double interval_end_);
+  double CalculatePreciseIntegral(double precision, double interval_start_,
+                                  double interval_end_);
 
  private:
   std::function<double(double)> function_;
-  double interval_start_;
-  double interval_end_;
   double OpenFormula(double xi, double xf);
   double ClosedFormula(double xi, double xf);
 };

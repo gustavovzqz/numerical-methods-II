@@ -3,9 +3,8 @@
 #include <cmath>
 #include <functional>
 
-NewtonCotes::NewtonCotes(std::function<double(double)> func, double start,
-                         double end)
-    : function_{func}, interval_start_{start}, interval_end_{end} {}
+NewtonCotes::NewtonCotes(std::function<double(double)> func)
+    : function_{func} {}
 
 double NewtonCotes::OpenFormula(double xi, double xf) {
   double h = (xf - xi) / 6;
@@ -23,7 +22,9 @@ double NewtonCotes::ClosedFormula(double xi, double xf) {
            14 * function_(xf)));
 }
 
-double NewtonCotes::CalculateOpenIntegral(unsigned int partitions) {
+double NewtonCotes::CalculateOpenIntegral(unsigned int partitions,
+                                          double interval_start_,
+                                          double interval_end_) {
   double dx = (interval_end_ - interval_start_) / partitions;
   double s = 0;
   double xi, xf;
@@ -35,7 +36,9 @@ double NewtonCotes::CalculateOpenIntegral(unsigned int partitions) {
   return s;
 }
 
-double NewtonCotes::CalculateClosedIntegral(unsigned int partitions) {
+double NewtonCotes::CalculateClosedIntegral(unsigned int partitions,
+                                            double interval_start_,
+                                            double interval_end_) {
   double dx = (interval_end_ - interval_start_) / partitions;
   double s = 0;
   double xi, xf;
@@ -47,14 +50,18 @@ double NewtonCotes::CalculateClosedIntegral(unsigned int partitions) {
   return s;
 }
 
-double NewtonCotes::CalculatePreciseIntegral(double precision) {
+double NewtonCotes::CalculatePreciseIntegral(double precision,
+                                             double interval_start_,
+                                             double interval_end_) {
   double error = 10;  // Any amount > 0.000001
-  double past_integration = CalculateClosedIntegral(1);
+  double past_integration =
+      CalculateClosedIntegral(1, interval_start_, interval_end_);
   double number_of_partitions = 1;
   double integration;
   while (error > precision) {
     number_of_partitions++;
-    integration = CalculateClosedIntegral(number_of_partitions);
+    integration = CalculateClosedIntegral(number_of_partitions, interval_start_,
+                                          interval_end_);
     error = fabs(((integration - past_integration) / integration));
     past_integration = integration;
   }

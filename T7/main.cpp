@@ -5,8 +5,8 @@
 #include "utils/function/include/singularity_integration.h"
 
 int main() {
-  double constexpr kIntervalPrecision{0.00006};
-  double constexpr kInnerPrecision{0.00006};
+  double constexpr kIntervalPrecision{0.00000000006};
+  double constexpr kInnerPrecision{0.00000000006};
 
   auto first_example = [](double x) { return (1. / cbrt(x * x)); };
   auto second_example = [](double x) { return (1 / (sqrt(4 - pow(x, 2)))); };
@@ -16,16 +16,16 @@ int main() {
   SingularityIntegration first_simple{first_example, 0, 1,
                                       ExponentialType::Simple};
   std::cout << std::setprecision(10) << "First example - simple: "
-            << first_simple.CalculatePreciseIntegral(kIntervalPrecision,
-                                                     kInnerPrecision)
+            << 2 * first_simple.CalculatePreciseIntegral(kIntervalPrecision,
+                                                         kInnerPrecision)
             << '\n';
 
   SingularityIntegration first_double{first_example, 0, 1,
                                       ExponentialType::Double};
 
   std::cout << "First example - double: "
-            << first_double.CalculatePreciseIntegral(kIntervalPrecision,
-                                                     kInnerPrecision)
+            << 2 * first_double.CalculatePreciseIntegral(kIntervalPrecision,
+                                                         kInnerPrecision)
             << '\n';
 
   // Second example
