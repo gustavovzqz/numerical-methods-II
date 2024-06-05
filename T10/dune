@@ -1,4 +1,4 @@
 (executable
  (public_name t10)
  (name main)
- (libraries eigen))
+ (libraries numerical))
