@@ -12,3 +12,5 @@ val vector_norm : vector -> float
 val normalize_vector : vector -> vector
 val dot_product : vector -> vector -> float
 val apply_matrix : matrix -> vector -> vector
+val regular_power_iteration : matrix -> vector -> float -> float * vector
+val print_vector : vector -> unit

@@ -23,12 +23,21 @@ let test_dot_product () =
   List.iter
     (fun (v1, v2, expected) ->
       let result = Linear.dot_product v1 v2 in
-      Printf.printf "Produto interno de ";
-      print_array v1;
-      Printf.printf " e ";
-      print_array v2;
-      Printf.printf ": %f (esperado: %f)\n" result expected;
       assert (result = expected))
     test_cases
 
-let () = test_dot_product ()
+let test_normalize_vector () =
+  let test_cases =
+    [
+      ([| 3.; 0.; 0. |], [| 1.; 0.; 0. |]); ([| 0.; 0.; 0. |], [| 0.; 0.; 0. |]);
+    ]
+  in
+  List.iter
+    (fun (v1, expected) ->
+      print_array expected;
+      let result = Linear.normalize_vector v1 in
+      print_array result;
+      assert (result = expected))
+    test_cases
+
+let () = test_dot_product () |> test_normalize_vector
