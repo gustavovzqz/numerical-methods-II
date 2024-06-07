@@ -64,16 +64,41 @@ let lu_decomposition mat =
   let n = Array.length mat and u = Array.copy mat in
   let l = identity_matrix n in
 
-  (* For each line ...*)
   for i = 0 to n - 1 do
-    (* For each column ... *)
     for j = i + 1 to n - 1 do
-      (* Find the scale factor to the line and store in the L matrix*)
       l.(j).(i) <- u.(j).(i) /. u.(i).(i);
       for k = i to n - 1 do
-        (* Update the line using the scale factor *)
         u.(j).(k) <- u.(j).(k) -. (l.(j).(i) *. u.(i).(k))
       done
     done
   done;
   (l, u)
+
+let solve_lower lmatrix b =
+  let n = Array.length lmatrix in
+  assert (Array.length b = n);
+  let x_array = Array.copy b in
+  for i = 0 to n - 1 do
+    for j = 0 to i - 1 do
+      x_array.(i) <- x_array.(i) -. (lmatrix.(i).(j) *. x_array.(j))
+    done;
+    x_array.(i) <- x_array.(i) /. lmatrix.(i).(i)
+  done;
+  x_array
+
+let solve_upper lmatrix b =
+  let n = Array.length lmatrix in
+  assert (Array.length b = n);
+  let x_array = Array.copy b in
+  for i = n - 1 downto 0 do
+    for j = n - 1 downto i + 1 do
+      x_array.(i) <- x_array.(i) -. (lmatrix.(i).(j) *. x_array.(j))
+    done;
+    x_array.(i) <- x_array.(i) /. lmatrix.(i).(i)
+  done;
+  x_array
+
+let solve_lu mat b_vec =
+  let l_mat, u_mat = lu_decomposition mat in
+  let y_vec = solve_lower l_mat b_vec in
+  solve_upper u_mat y_vec
