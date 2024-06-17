@@ -32,6 +32,14 @@ let dot_product v1 v2 =
 
   dot_prod 0 0.
 
+let sub_matrix m1 m2 =
+  let n = Array.length m1 in
+  Array.init n (fun i -> Array.init n (fun j -> m1.(i).(j) -. m2.(i).(j)))
+
+let scale_matrix lambda mat =
+  let n = Array.length mat in
+  Array.init n (fun i -> Array.init n (fun j -> mat.(i).(j) *. lambda))
+
 let apply_matrix mat vec =
   let columns = Array.length mat and n = Array.length vec in
   assert (n = columns);
@@ -47,6 +55,21 @@ let print_vector arr =
   print_string "]";
   print_newline ()
 
+let print_eigen lambda_list =
+  let print_pair (lamb, vec) =
+    print_endline ("Autovalor: " ^ string_of_float lamb);
+    print_string "Autovetor: ";
+    print_vector vec
+  in
+  let rec print_lambdas lambda_l =
+    match lambda_l with
+    | [] -> ()
+    | h :: t ->
+        print_pair h;
+        print_lambdas t
+  in
+  print_lambdas lambda_list
+
 let regular_power_iteration mat vec epsilon =
   let rec power_iteration new_lambda new_vec_k =
     let old_lambda = new_lambda in
@@ -61,7 +84,8 @@ let regular_power_iteration mat vec epsilon =
   power_iteration 0. vec
 
 let lu_decomposition mat =
-  let n = Array.length mat and u = Array.copy mat in
+  let n = Array.length mat in
+  let u = Array.init n (fun i -> Array.copy mat.(i)) in
   let l = identity_matrix n in
 
   for i = 0 to n - 2 do
@@ -115,3 +139,9 @@ let inverse_power_iteration mat vec epsilon =
     else (1. /. new_lambda, old_x1)
   in
   inverse_iteration 0. vec
+
+let shifted_power_iteration mat vec epsilon mi =
+  let id_matrix = identity_matrix (Array.length mat) in
+  let shifted_mat = sub_matrix mat (scale_matrix mi id_matrix) in
+  let lambda, eigen_vec = inverse_power_iteration shifted_mat vec epsilon in
+  (lambda +. mi, eigen_vec)
