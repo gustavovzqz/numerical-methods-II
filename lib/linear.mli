@@ -15,3 +15,7 @@ val solve_lu : matrix -> matrix -> vector -> vector
 val inverse_power_iteration : matrix -> vector -> float -> float * vector
 val solve_lower : matrix -> vector -> vector
 val solve_upper : matrix -> vector -> vector
+val print_eigen : (float * vector) list -> unit
+
+val shifted_power_iteration :
+  matrix -> vector -> float -> float -> float * vector
