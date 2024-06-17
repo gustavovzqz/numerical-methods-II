@@ -11,4 +11,7 @@ val apply_matrix : matrix -> vector -> vector
 val regular_power_iteration : matrix -> vector -> float -> float * vector
 val print_vector : vector -> unit
 val lu_decomposition : matrix -> matrix * matrix
-val solve_lu : matrix -> vector -> vector
+val solve_lu : matrix -> matrix -> vector -> vector
+val inverse_power_iteration : matrix -> vector -> float -> float * vector
+val solve_lower : matrix -> vector -> vector
+val solve_upper : matrix -> vector -> vector

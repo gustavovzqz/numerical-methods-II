@@ -64,7 +64,7 @@ let lu_decomposition mat =
   let n = Array.length mat and u = Array.copy mat in
   let l = identity_matrix n in
 
-  for i = 0 to n - 1 do
+  for i = 0 to n - 2 do
     for j = i + 1 to n - 1 do
       l.(j).(i) <- u.(j).(i) /. u.(i).(i);
       for k = i to n - 1 do
@@ -98,7 +98,20 @@ let solve_upper lmatrix b =
   done;
   x_array
 
-let solve_lu mat b_vec =
-  let l_mat, u_mat = lu_decomposition mat in
+let solve_lu l_mat u_mat b_vec =
   let y_vec = solve_lower l_mat b_vec in
   solve_upper u_mat y_vec
+
+let inverse_power_iteration mat vec epsilon =
+  let l_matrix, u_matrix = lu_decomposition mat in
+  let rec inverse_iteration new_lambda new_vec_k =
+    let old_lambda = new_lambda in
+    let old_vec_k = new_vec_k in
+    let old_x1 = normalize_vector old_vec_k in
+    let new_vec_k = solve_lu l_matrix u_matrix old_x1 in
+    let new_lambda = dot_product old_x1 new_vec_k in
+    let error = abs_float ((new_lambda -. old_lambda) /. new_lambda) in
+    if error > epsilon then inverse_iteration new_lambda new_vec_k
+    else (1. /. new_lambda, old_x1)
+  in
+  inverse_iteration 0. vec
