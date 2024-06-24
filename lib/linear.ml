@@ -13,6 +13,8 @@ let scale_vector k vec =
 let identity_matrix n =
   Array.init n (fun i -> Array.init n (fun j -> if i <> j then 0. else 1.))
 
+let init_vec n = Array.make n 0.
+
 let vector_norm vec =
   let sum_of_squares = Array.fold_left (fun acc x -> acc +. (x *. x)) 0. vec in
   sqrt sum_of_squares
@@ -40,10 +42,40 @@ let scale_matrix lambda mat =
   let n = Array.length mat in
   Array.init n (fun i -> Array.init n (fun j -> mat.(i).(j) *. lambda))
 
+let sub_vector v1 v2 =
+  let n = Array.length v1 in
+  Array.init n (fun i -> v1.(i) -. v2.(i))
+
+let prod_vec v1 v2 =
+  let n = Array.length v1 in
+  Array.init n (fun i -> Array.init n (fun j -> v1.(i) *. v2.(j)))
+
 let apply_matrix mat vec =
   let columns = Array.length mat and n = Array.length vec in
   assert (n = columns);
   Array.init n (fun i -> dot_product mat.(i) vec)
+
+let matrix_copy mat =
+  Array.init (Array.length mat) (fun i -> Array.copy mat.(i))
+
+let transpose matrix =
+  let rows = Array.length matrix in
+  let cols = Array.length matrix.(0) in
+  Array.init cols (fun col -> Array.init rows (fun row -> matrix.(row).(col)))
+
+let matrix_multiply matrix1 matrix2 =
+  let rows1 = Array.length matrix1 in
+  let cols1 = Array.length matrix1.(0) in
+  let cols2 = Array.length matrix2.(0) in
+  let transposed_matrix2 = transpose matrix2 in
+  Array.init rows1 (fun row ->
+      Array.init cols2 (fun col ->
+          let dot_product = ref 0. in
+          for i = 0 to cols1 - 1 do
+            dot_product :=
+              !dot_product +. (matrix1.(row).(i) *. transposed_matrix2.(col).(i))
+          done;
+          !dot_product))
 
 let print_vector arr =
   let n = Array.length arr in
@@ -54,6 +86,8 @@ let print_vector arr =
   done;
   print_string "]";
   print_newline ()
+
+let print_matrix mat = Array.iter (fun i -> print_vector i) mat
 
 let print_eigen lambda_list =
   let print_pair (lamb, vec) =
@@ -85,7 +119,7 @@ let regular_power_iteration mat vec epsilon =
 
 let lu_decomposition mat =
   let n = Array.length mat in
-  let u = Array.init n (fun i -> Array.copy mat.(i)) in
+  let u = matrix_copy mat in
   let l = identity_matrix n in
 
   for i = 0 to n - 2 do
@@ -145,3 +179,29 @@ let shifted_power_iteration mat vec epsilon mi =
   let shifted_mat = sub_matrix mat (scale_matrix mi id_matrix) in
   let lambda, eigen_vec = inverse_power_iteration shifted_mat vec epsilon in
   (lambda +. mi, eigen_vec)
+
+let create_new_householder_matrix a_mat last_column =
+  let mat_lenght = Array.length a_mat in
+  let vec_lenght = Array.length a_mat.(0) in
+  assert (vec_lenght = mat_lenght);
+  let n = mat_lenght in
+  let id_matrix = identity_matrix mat_lenght in
+  let w_vec = init_vec vec_lenght in
+  let w_line_vec = init_vec vec_lenght in
+  for i = last_column + 1 to n - 1 do
+    w_vec.(i) <- a_mat.(i).(last_column)
+  done;
+  w_line_vec.(last_column + 1) <- vector_norm w_vec;
+  let n_vector = normalize_vector (sub_vector w_vec w_line_vec) in
+  sub_matrix id_matrix (scale_matrix 2. (prod_vec n_vector n_vector))
+
+let householder_method a_matrix =
+  let n = Array.length a_matrix in
+  let id_matrix = identity_matrix n in
+  let rec hh_method a_old h iter =
+    let h_i = create_new_householder_matrix a_old iter in
+    let a_i = matrix_multiply (matrix_multiply h_i a_old) h_i in
+    let hh = matrix_multiply h h_i in
+    if iter = n - 3 then (a_i, hh) else hh_method a_i hh (iter + 1)
+  in
+  hh_method a_matrix id_matrix 0

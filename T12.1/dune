@@ -1,4 +1,4 @@
 (executable
- (public_name t12)
+ (public_name t12.1)
  (name main)
  (libraries numerical))
