@@ -13,6 +13,9 @@ let scale_vector k vec =
 let identity_matrix n =
   Array.init n (fun i -> Array.init n (fun j -> if i <> j then 0. else 1.))
 
+let init_vec n = Array.make n 0.
+let init_matrix m n = Array.make_matrix m n 0.
+
 let vector_norm vec =
   let sum_of_squares = Array.fold_left (fun acc x -> acc +. (x *. x)) 0. vec in
   sqrt sum_of_squares
@@ -39,6 +42,14 @@ let sub_matrix m1 m2 =
 let scale_matrix lambda mat =
   let n = Array.length mat in
   Array.init n (fun i -> Array.init n (fun j -> mat.(i).(j) *. lambda))
+
+let sub_vector v1 v2 =
+  let n = Array.length v1 in
+  Array.init n (fun i -> v1.(i) -. v2.(i))
+
+let prod_vec v1 v2 =
+  let n = Array.length v1 in
+  Array.init n (fun i -> Array.init n (fun j -> v1.(i) *. v2.(j)))
 
 let apply_matrix mat vec =
   let columns = Array.length mat and n = Array.length vec in
@@ -145,3 +156,18 @@ let shifted_power_iteration mat vec epsilon mi =
   let shifted_mat = sub_matrix mat (scale_matrix mi id_matrix) in
   let lambda, eigen_vec = inverse_power_iteration shifted_mat vec epsilon in
   (lambda +. mi, eigen_vec)
+
+let create_new_householder_matrix a_mat last_column =
+  let mat_lenght = Array.length a_mat in
+  let vec_lenght = Array.length a_mat.(0) in
+  assert (vec_lenght = mat_lenght);
+  let n = mat_lenght in
+  let id_matrix = identity_matrix mat_lenght in
+  let w_vec = init_vec vec_lenght in
+  let w_line_vec = init_vec vec_lenght in
+  for i = last_column + 1 to n - 1 do
+    w_vec.(i) <- a_mat.(i).(i)
+  done;
+  w_line_vec.(last_column + 1) <- vector_norm w_vec;
+  let n_vector = normalize_vector (sub_vector w_vec w_line_vec) in
+  sub_matrix id_matrix (scale_matrix 2. (prod_vec n_vector n_vector))
