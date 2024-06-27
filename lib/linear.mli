@@ -18,6 +18,11 @@ val solve_upper : matrix -> vector -> vector
 val print_eigen : (float * vector) list -> unit
 val householder_method : matrix -> matrix * matrix
 val print_matrix : matrix -> unit
+val qr_method : matrix -> float -> matrix * matrix
+val matrix_multiply : matrix -> matrix -> matrix
+val qr_method_printing : matrix -> float -> unit
+val transpose : matrix -> matrix
+val qr_householder : matrix -> matrix -> float -> matrix * matrix
 
 val shifted_power_iteration :
   matrix -> vector -> float -> float -> float * vector
