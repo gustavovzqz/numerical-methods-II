@@ -23,6 +23,7 @@ val matrix_multiply : matrix -> matrix -> matrix
 val qr_method_printing : matrix -> float -> unit
 val transpose : matrix -> matrix
 val qr_householder : matrix -> matrix -> float -> matrix * matrix
+val qr_decomposition : matrix -> matrix * matrix
 
 val shifted_power_iteration :
   matrix -> vector -> float -> float -> float * vector

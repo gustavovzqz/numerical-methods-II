@@ -11,12 +11,13 @@ let () =
     |]
   in
   let a_mat, p_mat = Linear.qr_method a_matrix epsilon_float in
-  let p_mat = Linear.transpose p_mat in
+  let p_mat = p_mat in
   print_endline "Matriz A:";
   Linear.print_matrix a_mat;
   print_endline "\nMatriz P";
   Linear.print_matrix p_mat;
 
+  let p_mat = Linear.transpose p_mat in
   print_endline "\nPares Autovalor | Autovetor";
   let n = Array.length p_mat in
   for i = 0 to n - 1 do
@@ -32,12 +33,16 @@ let () =
   let a_bar, h_mat = Linear.householder_method a_matrix in
   print_endline "\nPrintando H: ";
   Linear.print_matrix h_mat;
-  let a_mat, p_mat = Linear.qr_householder a_bar h_mat epsilon_float in
-  let p_mat = Linear.transpose p_mat in
+  let a_mat, p_mat = Linear.qr_method a_bar epsilon_float in
   print_endline "\nMatriz A:";
   Linear.print_matrix a_mat;
   print_endline "\nMatriz P";
   Linear.print_matrix p_mat;
+
+  print_endline "\nArrumando a matriz P fazendo H P";
+  let p_mat = Linear.matrix_multiply h_mat p_mat in
+  Linear.print_matrix p_mat;
+  let p_mat = Linear.transpose p_mat in
 
   print_endline "\nPares Autovalor | Autovetor";
   let n = Array.length p_mat in
