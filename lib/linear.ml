@@ -91,8 +91,8 @@ let print_matrix mat = Array.iter (fun i -> print_vector i) mat
 
 let print_eigen lambda_list =
   let print_pair (lamb, vec) =
-    print_endline ("Autovalor: " ^ string_of_float lamb);
-    print_string "Autovetor: ";
+    print_string ("Autovalor: " ^ string_of_float lamb);
+    print_string " | Autovetor: ";
     print_vector vec
   in
   let rec print_lambdas lambda_l =
@@ -205,3 +205,72 @@ let householder_method a_matrix =
     if iter = n - 3 then (a_i, hh) else hh_method a_i hh (iter + 1)
   in
   hh_method a_matrix id_matrix 0
+
+let qr_decomposition a_mat =
+  let a_old = ref (matrix_copy a_mat) in
+  let m = Array.length a_mat in
+  let n = Array.length a_mat.(0) in
+  let q_mat = ref (identity_matrix n) in
+  for j = 0 to n - 2 do
+    for i = j + 1 to n - 1 do
+      let q = identity_matrix m in
+      let x = !a_old.(j).(j) in
+      let y = !a_old.(i).(j) in
+      let l = sqrt ((x *. x) +. (y *. y)) in
+      let c = x /. l in
+      let s = -.(y /. l) in
+      q.(i).(i) <- c;
+      q.(j).(j) <- c;
+      q.(i).(j) <- s;
+      q.(j).(i) <- -.s;
+      q_mat := matrix_multiply !q_mat (transpose q);
+      a_old := matrix_multiply q !a_old
+    done
+  done;
+  (!q_mat, !a_old)
+
+let test_diagonal_matrix a_mat =
+  let n = Array.length a_mat in
+  let s = ref 0. in
+  for j = 0 to n - 2 do
+    for i = j + 1 to n - 1 do
+      s := !s +. (a_mat.(i).(j) *. a_mat.(i).(j))
+    done
+  done;
+  sqrt !s
+
+let qr_method a_mat epsilon =
+  let n = Array.length a_mat in
+  let rec qr_iteration old_a_mat old_p_mat =
+    let q_mat, r_mat = qr_decomposition old_a_mat in
+    let new_a_mat = matrix_multiply r_mat q_mat in
+    let new_p_mat = matrix_multiply old_p_mat q_mat in
+    let err_value = test_diagonal_matrix new_a_mat in
+    if err_value < epsilon then (new_a_mat, new_p_mat)
+    else qr_iteration new_a_mat new_p_mat
+  in
+  qr_iteration a_mat (identity_matrix n)
+
+let qr_method_printing a_mat epsilon =
+  let n = Array.length a_mat in
+  let rec qr_iteration old_a_mat old_p_mat =
+    print_matrix old_a_mat;
+    print_endline "";
+    let q_mat, r_mat = qr_decomposition old_a_mat in
+    let new_a_mat = matrix_multiply r_mat q_mat in
+    let new_p_mat = matrix_multiply old_p_mat q_mat in
+    let err_value = test_diagonal_matrix new_a_mat in
+    if err_value < epsilon then () else qr_iteration new_a_mat new_p_mat
+  in
+  qr_iteration a_mat (identity_matrix n)
+
+let qr_householder a_mat h_mat epsilon =
+  let rec qr_iteration old_a_mat old_x_mat =
+    let q_mat, r_mat = qr_decomposition old_a_mat in
+    let new_a_mat = matrix_multiply r_mat q_mat in
+    let new_x_mat = matrix_multiply old_x_mat q_mat in
+    let err_value = test_diagonal_matrix new_a_mat in
+    if err_value < epsilon then (new_a_mat, new_x_mat)
+    else qr_iteration new_a_mat new_x_mat
+  in
+  qr_iteration a_mat h_mat
