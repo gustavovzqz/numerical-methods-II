@@ -1,2 +1,3 @@
 (library
- (name numerical))
+ (name numerical)
+ (libraries graphics))

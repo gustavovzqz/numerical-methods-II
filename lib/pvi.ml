@@ -32,10 +32,39 @@ let runge_kutta state_ t_i derivative dt =
 
   add_state state_ (scale_state dt aux_sum)
 
-let get_nth_state initial_state t_i derivative dt last_state =
-  let rec aux iter rslt =
+let get_nth_state initial_state t_i derivative dt last_t =
+  let rec aux iter t_aux rslt =
     if iter = 0 then rslt
-    else aux (iter - 1) (runge_kutta rslt t_i derivative dt)
+    else aux (iter - 1) (t_aux +. dt) (runge_kutta rslt t_aux derivative dt)
   in
-  let iterations = int_of_float ((last_state -. t_i) /. dt) in
-  aux iterations initial_state
+  let iterations = int_of_float ((last_t -. t_i) /. dt) in
+  aux iterations t_i initial_state
+
+let plot_square x y sq_size =
+  Graphics.fill_rect (x - sq_size) (y - sq_size) (sq_size * 2) (sq_size * 2)
+
+let plot_function initial_state t_i derivative dt last_t =
+  Graphics.open_graph "";
+  let size_x = Graphics.size_x () and size_y = Graphics.size_y () in
+  let x_center, y_center = (size_x / 2, size_y / 2) in
+  (* Draw the Y line *)
+  Graphics.moveto x_center 0;
+  Graphics.lineto x_center size_y;
+  (* Draw the X line *)
+  Graphics.moveto 0 y_center;
+  Graphics.lineto size_x y_center;
+
+  let adjust_time t scale_factor =
+    int_of_float (t +. float_of_int x_center +. (t *. scale_factor))
+  and adjust_position y = int_of_float (y +. float_of_int y_center) in
+  for time = int_of_float t_i to int_of_float last_t do
+    let f_time = float_of_int time in
+    let _, y0 = get_nth_state initial_state t_i derivative dt f_time in
+    Printf.printf "[DEBUG]: TIME: %f; POSITION: %f\n" f_time y0;
+    let new_time = adjust_time f_time 20.
+    and new_position = adjust_position y0 in
+    plot_square new_time new_position 3
+  done;
+
+  let _ = Graphics.read_key () in
+  ()
