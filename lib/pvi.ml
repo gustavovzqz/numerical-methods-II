@@ -1,15 +1,15 @@
 type state = float * float
 type state_derivative = state -> float -> state
 
-let init_state f1 f2 = f1 * f2
+let init_state f1 f2 = (f1, f2)
 let add_state (a0, a1) (b0, b1) = (a0 +. b0, a1 +. b1)
 let scale_state t (a0, a1) = (t *. a0, t *. a1)
 
-let derivative_of_state state_ expr t1 =
+let derivative_of_state expr state_ t1 =
   let v0, _ = state_ in
   (expr state_ t1, v0)
 
-let init_derivative state_ = derivative_of_state state_
+let init_derivative expr = derivative_of_state expr
 
 let runge_kutta state_ t_i derivative dt =
   let f1 = derivative state_ t_i in
@@ -31,3 +31,11 @@ let runge_kutta state_ t_i derivative dt =
   let aux_sum = add_state f1_aux (add_state f2_aux f3_aux) in
 
   add_state state_ (scale_state dt aux_sum)
+
+let get_nth_state initial_state t_i derivative dt last_state =
+  let rec aux iter rslt =
+    if iter = 0 then rslt
+    else aux (iter - 1) (runge_kutta rslt t_i derivative dt)
+  in
+  let iterations = int_of_float ((last_state -. t_i) /. dt) in
+  aux iterations initial_state
