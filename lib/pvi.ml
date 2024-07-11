@@ -32,14 +32,6 @@ let runge_kutta state_ t_i derivative dt =
 
   add_state state_ (scale_state dt aux_sum)
 
-let get_nth_state initial_state t_i derivative dt last_t =
-  let rec aux iter t_aux rslt =
-    if iter = 0 then rslt
-    else aux (iter - 1) (t_aux +. dt) (runge_kutta rslt t_aux derivative dt)
-  in
-  let iterations = int_of_float ((last_t -. t_i) /. dt) in
-  aux iterations t_i initial_state
-
 let plot_square x y sq_size =
   Graphics.fill_rect (x - sq_size) (y - sq_size) (sq_size * 2) (sq_size * 2)
 
@@ -58,17 +50,18 @@ let plot_function_fst initial_state t_i derivative dt last_t =
     int_of_float (t +. float_of_int x_center +. (t *. scale_factor))
   and adjust_position y = int_of_float (y +. float_of_int y_center) in
 
-  let rec plot_loop current_time =
+  let rec plot_loop current_time ((_, current_position) as current_state) =
     if current_time > last_t then ()
     else
-      let _, y0 = get_nth_state initial_state t_i derivative dt current_time in
-      Printf.printf "[DEBUG]: TIME: %f; POSITION: %f\n" current_time y0;
       let new_time = adjust_time current_time 40.
-      and new_position = adjust_position y0 in
+      and new_position = adjust_position current_position in
+      Printf.printf "[DEBUG]: TIME: %f; POSITION: %f\n" current_time
+        current_position;
       plot_square new_time new_position 2;
-      plot_loop (current_time +. dt)
+      let new_state = runge_kutta current_state current_time derivative dt in
+      plot_loop (current_time +. dt) new_state
   in
-  plot_loop t_i;
+  plot_loop t_i initial_state;
   let _ = Graphics.read_key () in
   ()
 
@@ -87,16 +80,16 @@ let plot_function_snd initial_state t_i derivative dt last_t =
     int_of_float (t +. float_of_int x_center +. (t *. scale_factor))
   and adjust_speed y = int_of_float (y +. float_of_int y_center) in
 
-  let rec plot_loop current_time =
+  let rec plot_loop current_time ((current_speed, _) as current_state) =
     if current_time > last_t then ()
     else
-      let v0, _ = get_nth_state initial_state t_i derivative dt current_time in
-      Printf.printf "[DEBUG]: TIME: %f; SPEED: %f\n" current_time v0;
       let new_time = adjust_time current_time 40.
-      and new_speed = adjust_speed v0 in
+      and new_speed = adjust_speed current_speed in
+      Printf.printf "[DEBUG]: TIME: %f; SPEED: %f\n" current_time current_speed;
       plot_square new_time new_speed 2;
-      plot_loop (current_time +. dt)
+      let new_state = runge_kutta current_state current_time derivative dt in
+      plot_loop (current_time +. dt) new_state
   in
-  plot_loop t_i;
+  plot_loop t_i initial_state;
   let _ = Graphics.read_key () in
   ()
