@@ -2,3 +2,4 @@
 Build/
 build/
 _build/
+.cache/
