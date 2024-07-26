@@ -11,7 +11,7 @@ let derivative_of_state expr state_ t1 =
 
 let init_derivative expr = derivative_of_state expr
 
-let runge_kutta state_ t_i derivative dt =
+let third_runge_kutta state_ t_i derivative dt =
   let f1 = derivative state_ t_i in
   let half_dt = dt /. 2. in
   let s_one_half = add_state state_ (scale_state half_dt f1) in
@@ -31,6 +31,26 @@ let runge_kutta state_ t_i derivative dt =
   let aux_sum = add_state f1_aux (add_state f2_aux f3_aux) in
 
   add_state state_ (scale_state dt aux_sum)
+
+let fourth_runge_kutta state_ t_i derivative dt =
+  let f1 = derivative state_ t_i in
+  let s2 = add_state state_ (scale_state 0.5 f1) in
+  let half_dt = dt /. 2. in
+  let f2 = derivative s2 (t_i +. half_dt) in
+  let s3 = add_state state_ (scale_state half_dt f2) in
+  let f3 = derivative s3 (t_i +. half_dt) in
+  let s4 = add_state state_ (scale_state dt f3) in
+  let f4 = derivative s4 (t_i +. dt) in
+
+  let aux_sum =
+    add_state
+      (add_state (add_state f1 (scale_state 2. f2)) (scale_state 2. f3))
+      f4
+  in
+
+  add_state state_ (scale_state (dt /. 6.) aux_sum)
+
+(* let predictor_corrector s1 s2 s3 Recebe os estados anteriores... *)
 
 let plot_square x y sq_size =
   Graphics.fill_rect (x - sq_size) (y - sq_size) (sq_size * 2) (sq_size * 2)
@@ -58,7 +78,9 @@ let plot_function_fst initial_state t_i derivative dt last_t =
       Printf.printf "[DEBUG]: TIME: %f; POSITION: %f\n" current_time
         current_position;
       plot_square new_time new_position 2;
-      let new_state = runge_kutta current_state current_time derivative dt in
+      let new_state =
+        fourth_runge_kutta current_state current_time derivative dt
+      in
       plot_loop (current_time +. dt) new_state
   in
   plot_loop t_i initial_state;
@@ -87,7 +109,9 @@ let plot_function_snd initial_state t_i derivative dt last_t =
       and new_speed = adjust_speed current_speed in
       Printf.printf "[DEBUG]: TIME: %f; SPEED: %f\n" current_time current_speed;
       plot_square new_time new_speed 2;
-      let new_state = runge_kutta current_state current_time derivative dt in
+      let new_state =
+        fourth_runge_kutta current_state current_time derivative dt
+      in
       plot_loop (current_time +. dt) new_state
   in
   plot_loop t_i initial_state;
