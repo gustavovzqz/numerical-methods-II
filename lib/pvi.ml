@@ -50,7 +50,29 @@ let fourth_runge_kutta state_ t_i derivative dt =
 
   add_state state_ (scale_state (dt /. 6.) aux_sum)
 
-(* let predictor_corrector s1 s2 s3 Recebe os estados anteriores... *)
+let predictor_corrector f3 f2 f1 state_ dt eps =
+  let aux_sum =
+    let aux_1 = scale_state (-9.) f3
+    and aux_2 = scale_state 37. f2
+    and aux_3 = scale_state (-59.) f1
+    and aux_4 = scale_state 55. state_ in
+    add_state aux_1 (add_state aux_2 (add_state aux_3 aux_4))
+  in
+  let approx_s1 = add_state state_ (scale_state (dt /. 24.) aux_sum)
+  in 
+
+  let rec get_accurate_s1 previous_s1 =
+  if (previous_s1 <= eps) then previous_s1 else
+    let acc_s1 = (* faz a conta *) 
+
+    in
+
+    get_accurate_s1 acc_s1 
+
+  in
+  get_accurate_s1 approx_s1 
+
+
 
 let plot_square x y sq_size =
   Graphics.fill_rect (x - sq_size) (y - sq_size) (sq_size * 2) (sq_size * 2)
