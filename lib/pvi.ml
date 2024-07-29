@@ -50,6 +50,10 @@ let fourth_runge_kutta state_ t_i derivative dt =
 
   add_state state_ (scale_state (dt /. 6.) aux_sum)
 
+let is_close_enough (c1, c2) (p1, p2) eps =
+  let ep1 = (c1 -. p1) /. c1 and ep2 = (c2 -. p2) /. c2 in
+  ep2 <= eps || ep1 <= eps
+
 let predictor_corrector f3 f2 f1 state_ dt eps =
   let aux_sum =
     let aux_1 = scale_state (-9.) f3
@@ -69,7 +73,7 @@ let predictor_corrector f3 f2 f1 state_ dt eps =
     in
     let current_acc = add_state state_ (scale_state (dt /. 24.) aux_sum) in
 
-    if calculate_error current_acc previous_s1 > eps then
+    if is_close_enough current_acc previous_s1 eps then
       get_accurate_s1 current_acc
     else current_acc
   in
