@@ -58,21 +58,23 @@ let predictor_corrector f3 f2 f1 state_ dt eps =
     and aux_4 = scale_state 55. state_ in
     add_state aux_1 (add_state aux_2 (add_state aux_3 aux_4))
   in
-  let approx_s1 = add_state state_ (scale_state (dt /. 24.) aux_sum)
-  in 
+  let approx_s1 = add_state state_ (scale_state (dt /. 24.) aux_sum) in
 
   let rec get_accurate_s1 previous_s1 =
-  if (previous_s1 <= eps) then previous_s1 else
-    let acc_s1 = (* faz a conta *) 
-
+    let aux_sum =
+      let aux_f1 = scale_state (-5.) f1
+      and aux_fi = scale_state 19. state_
+      and aux_acc = scale_state 9. previous_s1 in
+      add_state f2 (add_state aux_f1 (add_state aux_fi aux_acc))
     in
+    let current_acc = add_state state_ (scale_state (dt /. 24.) aux_sum) in
 
-    get_accurate_s1 acc_s1 
-
+    if calculate_error current_acc previous_s1 > eps then
+      get_accurate_s1 current_acc
+    else current_acc
   in
-  get_accurate_s1 approx_s1 
 
-
+  get_accurate_s1 approx_s1
 
 let plot_square x y sq_size =
   Graphics.fill_rect (x - sq_size) (y - sq_size) (sq_size * 2) (sq_size * 2)
