@@ -7,5 +7,5 @@ let () =
   (* Expressão final que define a derivada *)
   let expr (v0, _) _ = -10. -. (0.25 /. 2. *. v0) in
   let deriv = Pvi.init_derivative expr in
-  Pvi.plot_function_fst_PC initial_state 0. deriv 0.1 15. 0.1;
-  Pvi.plot_function_snd_PC initial_state 0. deriv 0.1 15. 0.1
+  Pvi.plot_function_fst_PC initial_state 0. deriv 0.0001 15. epsilon_float;
+  Pvi.plot_function_snd_PC initial_state 0. deriv 0.0001 15. epsilon_float
