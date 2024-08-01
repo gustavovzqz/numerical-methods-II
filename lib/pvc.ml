@@ -4,6 +4,7 @@ let get_inverse_dx_squared nodes =
   let square x = x *. x in
   square (float_of_int nodes)
 
+(* TODO: Como saber se o elemento está na borda... não é tão simples... ou é? *)
 let init_matrix bound size =
   Mat.init_2d size size (fun i j ->
       match bound i j with Some number -> number | None -> 0.)
