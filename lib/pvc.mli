@@ -1,1 +1,1 @@
-val finit_differences : Owl.Mat.mat -> int -> (float -> float -> float -> float) -> Owl.Mat.mat 
+val get_linear_system_M2 : (int -> int -> float option) -> int -> Owl.Mat.mat
