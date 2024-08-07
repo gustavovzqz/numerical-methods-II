@@ -1,14 +1,16 @@
 open Owl
 
-let get_inverse_dx_squared nodes =
-  let square x = x *. x in
-  square (float_of_int nodes)
+let get_inverse_squared x = 1. /. (x *. x)
 
-let get_side_values part =
-  let idx2 = get_inverse_dx_squared part in
-  let center_value = -2. *. (idx2 +. idx2)
+let get_side_values part width height =
+  let part = float_of_int part in
+  let idx = width /. part and idy = height /. part in
+
+  let idx2 = get_inverse_squared idx and idy2 = get_inverse_squared idy in
+
+  let center_value = -2. *. (idx2 +. idy2)
   and side_value = idx2
-  and vertical_value = idx2 in
+  and vertical_value = idy2 in
   (center_value, side_value, vertical_value)
 
 let init_matrix rows cols f =
@@ -25,7 +27,11 @@ let get_matrix_value i j ~bounds ~limit =
   | _, lim when lim = limit -> Bound right
   | _ -> Equation
 
-let get_linear_system_M2 bound partitions =
+let get_linear_system_M1 bound ~width partitions =
+  let domain = Array.make (partitions + 1) 0. in
+  domain
+
+let get_linear_system_M2 bound ~width ~height partitions =
   let equations_per_line = partitions - 1 in
   let system_size = equations_per_line * equations_per_line in
 
@@ -38,7 +44,9 @@ let get_linear_system_M2 bound partitions =
       (get_matrix_value ~bounds:bound ~limit:partitions)
   and linear_system = Mat.empty system_size system_size in
 
-  let center_value, side_value, vertical_value = get_side_values partitions in
+  let center_value, side_value, vertical_value =
+    get_side_values partitions width height
+  in
 
   let get_side_value = function Bound num -> num | Equation -> side_value
   and get_vertical_value = function
