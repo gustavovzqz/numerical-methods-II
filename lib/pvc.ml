@@ -36,7 +36,7 @@ let get_matrix_value i j ~limit =
   | _, lim when lim = limit -> Right
   | _ -> Equation
 
-let get_linear_system_M1 (left_bound, right_bound) ~width partitions b_vector =
+let finit_differences_M1 (left_bound, right_bound) ~width partitions b_vector =
   let system_size = partitions - 1 in
   let center_value, side_value = get_side_values_M1 partitions width in
 
@@ -68,10 +68,9 @@ let get_linear_system_M1 (left_bound, right_bound) ~width partitions b_vector =
     write_linear_system i i center_value;
     write_linear_system i right_position right_value
   done;
-  Mat.print b_vector;
-  linear_system
+  Linalg.D.linsolve linear_system b_vector
 
-let get_linear_system_M2 (left_bound, up_bound, right_bound, down_bound) ~width
+let finit_differences_M2 (left_bound, up_bound, right_bound, down_bound) ~width
     ~height partitions b_vector =
   let equations_per_line = partitions - 1 in
   let system_size = equations_per_line * equations_per_line in
@@ -130,5 +129,4 @@ let get_linear_system_M2 (left_bound, up_bound, right_bound, down_bound) ~width
       eq_pos := !eq_pos + 1
     done
   done;
-  Mat.print b_vector;
-  linear_system
+  Linalg.D.linsolve linear_system b_vector
