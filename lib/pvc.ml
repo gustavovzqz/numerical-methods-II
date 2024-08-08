@@ -2,7 +2,7 @@ open Owl
 
 let get_inverse_squared x = 1. /. (x *. x)
 
-let get_side_values part width height =
+let get_side_values_M2 part width height =
   let part = float_of_int part in
   let idx = width /. part and idy = height /. part in
 
@@ -13,25 +13,66 @@ let get_side_values part width height =
   and vertical_value = idy2 in
   (center_value, side_value, vertical_value)
 
+let get_side_values_M1 part width =
+  let part = float_of_int part in
+  let idx = width /. part in
+
+  let idx2 = get_inverse_squared idx in
+
+  let center_value = (-2. *. idx2) -. 1. in
+  let side_value = idx2 in
+  (center_value, side_value)
+
 let init_matrix rows cols f =
   Array.init rows (fun i -> Array.init cols (fun j -> f i j))
 
-type node = Bound of float | Equation
+type node = Left | Right | Upper | Down | Equation
 
-let get_matrix_value i j ~bounds ~limit =
-  let lower, left, upper, right = bounds in
+let get_matrix_value i j ~limit =
   match (i, j) with
-  | 0, _ -> Bound lower
-  | lim, _ when lim = limit -> Bound upper
-  | _, 0 -> Bound left
-  | _, lim when lim = limit -> Bound right
+  | _, 0 -> Left
+  | lim, _ when lim = limit -> Upper
+  | 0, _ -> Down
+  | _, lim when lim = limit -> Right
   | _ -> Equation
 
-let get_linear_system_M1 bound ~width partitions =
-  let domain = Array.make (partitions + 1) 0. in
-  domain
+let get_linear_system_M1 (left_bound, right_bound) ~width partitions b_vector =
+  let system_size = partitions - 1 in
+  let center_value, side_value = get_side_values_M1 partitions width in
 
-let get_linear_system_M2 bound ~width ~height partitions =
+  let linear_system = Mat.empty system_size system_size in
+
+  let write_linear_system i j value =
+    if j >= 0 && j < system_size then Mat.set linear_system i j value else ()
+  in
+
+  for i = 0 to system_size - 1 do
+    let left_position = i - 1 and right_position = i + 1 in
+
+    let get_position_value pos value =
+      let b_value = Mat.get b_vector i 0 in
+      match pos with
+      | -1 ->
+          Mat.set b_vector i 0 (b_value -. (left_bound *. value));
+          0.
+      | k when k = system_size ->
+          Mat.set b_vector i 0 (b_value -. (right_bound *. value));
+          0.
+      | _ -> value
+    in
+
+    let left_value = get_position_value left_position side_value
+    and right_value = get_position_value right_position side_value in
+
+    write_linear_system i left_position left_value;
+    write_linear_system i i center_value;
+    write_linear_system i right_position right_value
+  done;
+  Mat.print b_vector;
+  linear_system
+
+let get_linear_system_M2 (left_bound, up_bound, right_bound, down_bound) ~width
+    ~height partitions b_vector =
   let equations_per_line = partitions - 1 in
   let system_size = equations_per_line * equations_per_line in
 
@@ -41,33 +82,39 @@ let get_linear_system_M2 bound ~width ~height partitions =
 
   let domain =
     init_matrix (partitions + 1) (partitions + 1)
-      (get_matrix_value ~bounds:bound ~limit:partitions)
+      (get_matrix_value ~limit:partitions)
   and linear_system = Mat.empty system_size system_size in
 
   let center_value, side_value, vertical_value =
-    get_side_values partitions width height
-  in
-
-  let get_side_value = function Bound num -> num | Equation -> side_value
-  and get_vertical_value = function
-    | Bound num -> num
-    | Equation -> vertical_value
+    get_side_values_M2 partitions width height
   in
 
   let eq_pos = ref 0 in
-  (* Domain = nodes x nodes, and we want to iter in the innner matrix, starting in [1][1] and going to [nodes - 2] [nodes - 2] *)
   for i = 1 to partitions - 1 do
     for j = 1 to partitions - 1 do
-      (*       Printf.printf "Estou na posição [%d][%d]\n" i j; *)
-      let left_value = get_side_value domain.(i).(j - 1)
-      and right_value = get_side_value domain.(i).(j + 1)
-      and up_value = get_vertical_value domain.(i + 1).(j)
-      and down_value = get_vertical_value domain.(i - 1).(j) in
+      let get_matrix_value node value =
+        let b_value = Mat.get b_vector !eq_pos 0 in
+        match node with
+        | Left ->
+            Mat.set b_vector !eq_pos 0 (b_value -. (left_bound *. value));
+            0.
+        | Right ->
+            Mat.set b_vector !eq_pos 0 (b_value -. (right_bound *. value));
+            0.
+        | Upper ->
+            Mat.set b_vector !eq_pos 0 (b_value -. (up_bound *. value));
+            0.
+        | Down ->
+            Mat.set b_vector !eq_pos 0 (b_value -. (down_bound *. value));
+            0.
+        | Equation -> value
+      in
 
-      (*       Printf.printf "Esquerda: [%f]\nDireita: [%f]\nCima: [%f]\nBaixo: [%f]" *)
-      (*         left_value right_value up_value down_value; *)
+      let left_value = get_matrix_value domain.(i).(j - 1) vertical_value
+      and right_value = get_matrix_value domain.(i).(j + 1) vertical_value
+      and up_value = get_matrix_value domain.(i + 1).(j) side_value
+      and down_value = get_matrix_value domain.(i - 1).(j) side_value in
 
-      (* Writing the values *)
       let write_linear_system position value =
         if position >= 0 && position < system_size then
           Mat.set linear_system !eq_pos position value
@@ -83,4 +130,5 @@ let get_linear_system_M2 bound ~width ~height partitions =
       eq_pos := !eq_pos + 1
     done
   done;
+  Mat.print b_vector;
   linear_system
