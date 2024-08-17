@@ -5,12 +5,6 @@ let init_state f1 f2 = (f1, f2)
 let add_state (a0, a1) (b0, b1) = (a0 +. b0, a1 +. b1)
 let scale_state t (a0, a1) = (t *. a0, t *. a1)
 
-let derivative_of_state expr state_ t1 =
-  let v0, _ = state_ in
-  (expr state_ t1, v0)
-
-let init_derivative expr = derivative_of_state expr
-
 let third_runge_kutta state_ t_i derivative dt =
   let f1 = derivative state_ t_i in
   let half_dt = dt /. 2. in
