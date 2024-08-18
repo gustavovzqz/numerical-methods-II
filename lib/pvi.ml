@@ -12,9 +12,9 @@ let third_runge_kutta state_ t_i derivative dt =
   let f2 = derivative s_one_half (t_i +. half_dt) in
 
   let minus_f1 = scale_state (-1.) f1 in
-  let double_one_half = scale_state 2. s_one_half in
+  let double_f2 = scale_state 2. f2 in
   let s_approx =
-    add_state state_ (scale_state dt (add_state minus_f1 double_one_half))
+    add_state state_ (scale_state dt (add_state minus_f1 double_f2))
   in
   let f3 = derivative s_approx (t_i +. dt) in
 
@@ -28,8 +28,8 @@ let third_runge_kutta state_ t_i derivative dt =
 
 let fourth_runge_kutta state_ t_i derivative dt =
   let f1 = derivative state_ t_i in
-  let s2 = add_state state_ (scale_state 0.5 f1) in
   let half_dt = dt /. 2. in
+  let s2 = add_state state_ (scale_state half_dt f1) in
   let f2 = derivative s2 (t_i +. half_dt) in
   let s3 = add_state state_ (scale_state half_dt f2) in
   let f3 = derivative s3 (t_i +. half_dt) in
@@ -105,7 +105,7 @@ let plot_function_fst initial_state t_i derivative dt final_t =
         current_position;
       plot_square new_time new_position 2;
       let new_state =
-        fourth_runge_kutta current_state current_time derivative dt
+        third_runge_kutta current_state current_time derivative dt
       in
       plot_loop (current_time +. dt) new_state
   in
@@ -136,7 +136,7 @@ let plot_function_snd initial_state t_i derivative dt final_t =
       Printf.printf "[DEBUG]: TIME: %f; SPEED: %f\n" current_time current_speed;
       plot_square new_time new_speed 2;
       let new_state =
-        fourth_runge_kutta current_state current_time derivative dt
+        third_runge_kutta current_state current_time derivative dt
       in
       plot_loop (current_time +. dt) new_state
   in
@@ -159,6 +159,11 @@ let plot_function_fst_PC initial_state t_i derivative dt final_t eps =
     int_of_float (t +. float_of_int x_center +. (t *. scale_factor))
   and adjust_position y = int_of_float (y +. float_of_int y_center) in
 
+  let _, p1 = initial_state in
+
+  Printf.printf "[DEBUG]: TIME: %f; POSITION: %f\n" t_i p1;
+  let t_i = t_i +. dt in
+
   let ((_, p1) as s1) = fourth_runge_kutta initial_state t_i derivative dt in
   plot_square (adjust_time t_i 40.) (adjust_position p1) 2;
   Printf.printf "[DEBUG]: TIME: %f; POSITION: %f\n" t_i p1;
@@ -169,11 +174,7 @@ let plot_function_fst_PC initial_state t_i derivative dt final_t eps =
   Printf.printf "[DEBUG]: TIME: %f; POSITION: %f\n" t_i p2;
   let t_i = t_i +. dt in
 
-  let ((_, p3) as s3) = fourth_runge_kutta s2 t_i derivative dt in
-
-  plot_square (adjust_time t_i 40.) (adjust_position p3) 2;
-  Printf.printf "[DEBUG]: TIME: %f; POSITION: %f\n" t_i p3;
-  let t_i = t_i +. dt in
+  let s3 = fourth_runge_kutta s2 t_i derivative dt in
 
   let rec plot_loop current_time state_0 state_1 state_2
       ((_, current_position) as state_3) =
@@ -209,6 +210,11 @@ let plot_function_snd_PC initial_state t_i derivative dt final_t eps =
     int_of_float (t +. float_of_int x_center +. (t *. scale_factor))
   and adjust_speed y = int_of_float (y +. float_of_int y_center) in
 
+  let p1, _ = initial_state in
+
+  Printf.printf "[DEBUG]: TIME: %f; SPEED: %f\n" t_i p1;
+  let t_i = t_i +. dt in
+
   let ((p1, _) as s1) = fourth_runge_kutta initial_state t_i derivative dt in
   plot_square (adjust_time t_i 40.) (adjust_speed p1) 2;
   Printf.printf "[DEBUG]: TIME: %f; SPEED: %f\n" t_i p1;
@@ -219,11 +225,7 @@ let plot_function_snd_PC initial_state t_i derivative dt final_t eps =
   Printf.printf "[DEBUG]: TIME: %f; SPEED: %f\n" t_i p2;
   let t_i = t_i +. dt in
 
-  let ((p3, _) as s3) = fourth_runge_kutta s2 t_i derivative dt in
-
-  plot_square (adjust_time t_i 40.) (adjust_speed p3) 2;
-  Printf.printf "[DEBUG]: TIME: %f; SPEED: %f\n" t_i p3;
-  let t_i = t_i +. dt in
+  let s3 = fourth_runge_kutta s2 t_i derivative dt in
 
   let rec plot_loop current_time state_0 state_1 state_2
       ((current_speed, _) as state_3) =
