@@ -1,0 +1,4 @@
+(executable
+ (public_name t12.svd)
+ (name main)
+ (libraries numerical))

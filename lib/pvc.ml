@@ -2,6 +2,16 @@ open Owl
 
 let get_inverse_squared x = 1. /. (x *. x)
 
+let get_side_values_M1 part width =
+  let part = float_of_int part in
+  let idx = width /. part in
+
+  let idx2 = get_inverse_squared idx in
+
+  let center_value = (-2. *. idx2) -. 1. in
+  let side_value = idx2 in
+  (center_value, side_value)
+
 let get_side_values_M2 part width height =
   let part = float_of_int part in
   let idx = width /. part and idy = height /. part in
@@ -12,16 +22,6 @@ let get_side_values_M2 part width height =
   and side_value = idx2
   and vertical_value = idy2 in
   (center_value, side_value, vertical_value)
-
-let get_side_values_M1 part width =
-  let part = float_of_int part in
-  let idx = width /. part in
-
-  let idx2 = get_inverse_squared idx in
-
-  let center_value = (-2. *. idx2) -. 1. in
-  let side_value = idx2 in
-  (center_value, side_value)
 
 let init_matrix rows cols f =
   Array.init rows (fun i -> Array.init cols (fun j -> f i j))
@@ -39,6 +39,8 @@ let get_matrix_value i j ~limit =
 let finit_differences_M1 (left_bound, right_bound) ~width partitions b_vector =
   let system_size = partitions - 1 in
   let center_value, side_value = get_side_values_M1 partitions width in
+
+  Printf.printf "Valor de Dx: %f\n" (width /. float_of_int partitions);
 
   let linear_system = Mat.empty system_size system_size in
 
@@ -68,6 +70,8 @@ let finit_differences_M1 (left_bound, right_bound) ~width partitions b_vector =
     write_linear_system i i center_value;
     write_linear_system i right_position right_value
   done;
+  Mat.print linear_system;
+  Mat.print b_vector;
   Linalg.D.linsolve linear_system b_vector
 
 let finit_differences_M2 (left_bound, up_bound, right_bound, down_bound) ~width
@@ -75,9 +79,9 @@ let finit_differences_M2 (left_bound, up_bound, right_bound, down_bound) ~width
   let equations_per_line = partitions - 1 in
   let system_size = equations_per_line * equations_per_line in
 
-  Printf.printf
-    "Partições: [%d]\nEquações por linha: [%d]\nTamanho do sistema: [%d]\n"
-    partitions equations_per_line system_size;
+  Printf.printf "Valor de Dx: %f, valor de Dy: %f"
+    (width /. float_of_int partitions)
+    (height /. float_of_int partitions);
 
   let domain =
     init_matrix (partitions + 1) (partitions + 1)
