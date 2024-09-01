@@ -6,6 +6,8 @@ struct Function {
   Function(double dx, std::function<double(double)> calculate_lambda);
   double Calculate(double x);
   double SecondDerivative(double x);
+  double SecondDerivativeForward(double x);
+  double SecondDerivativeBackward(double x);
   double dx;
   std::function<double(double)> calculate_;
 };
