@@ -1,4 +1,4 @@
 (executable
- (public_name t14)
+ (public_name tpvi)
  (name main)
  (libraries numerical))

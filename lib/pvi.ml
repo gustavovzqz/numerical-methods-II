@@ -78,169 +78,47 @@ let predictor_corrector s0 s1 s2 s3 t_i derivative dt eps =
 
   get_accurate_s1 approx_s4
 
-let plot_square x y sq_size =
-  Graphics.fill_rect (x - sq_size) (y - sq_size) (sq_size * 2) (sq_size * 2)
-
-let plot_function_fst initial_state t_i derivative dt final_t =
-  Graphics.open_graph "";
-  let size_x = Graphics.size_x () and size_y = Graphics.size_y () in
-  let x_center, y_center = (size_x / 8, size_y / 2) in
-  (* Draw the Y line *)
-  Graphics.moveto x_center 0;
-  Graphics.lineto x_center size_y;
-  (* Draw the X line *)
-  Graphics.moveto 0 y_center;
-  Graphics.lineto size_x y_center;
-
-  let adjust_time t scale_factor =
-    int_of_float (t +. float_of_int x_center +. (t *. scale_factor))
-  and adjust_position y = int_of_float (y +. float_of_int y_center) in
-
-  let rec plot_loop current_time ((_, current_position) as current_state) =
-    if current_time > final_t then ()
+let get_data_RK initial_state t_i derivative dt final_t =
+  let rec plot_loop current_time
+      ((current_speed, current_position) as current_state) acc =
+    if current_time > final_t then List.rev acc
     else
-      let new_time = adjust_time current_time 40.
-      and new_position = adjust_position current_position in
-      Printf.printf "[DEBUG]: TIME: %f; POSITION: %f\n" current_time
-        current_position;
-      plot_square new_time new_position 2;
       let new_state =
         third_runge_kutta current_state current_time derivative dt
       in
       plot_loop (current_time +. dt) new_state
+        ((current_time, current_position, current_speed) :: acc)
   in
-  plot_loop t_i initial_state;
-  let _ = Graphics.read_key () in
-  ()
+  plot_loop t_i initial_state []
 
-let plot_function_snd initial_state t_i derivative dt final_t =
-  Graphics.open_graph "";
-  let size_x = Graphics.size_x () and size_y = Graphics.size_y () in
-  let x_center, y_center = (size_x / 8, size_y / 2) in
-  (* Draw the Y line *)
-  Graphics.moveto x_center 0;
-  Graphics.lineto x_center size_y;
-  (* Draw the X line *)
-  Graphics.moveto 0 y_center;
-  Graphics.lineto size_x y_center;
-
-  let adjust_time t scale_factor =
-    int_of_float (t +. float_of_int x_center +. (t *. scale_factor))
-  and adjust_speed y = int_of_float (y +. float_of_int y_center) in
-
-  let rec plot_loop current_time ((current_speed, _) as current_state) =
-    if current_time > final_t then ()
-    else
-      let new_time = adjust_time current_time 40.
-      and new_speed = adjust_speed current_speed in
-      Printf.printf "[DEBUG]: TIME: %f; SPEED: %f\n" current_time current_speed;
-      plot_square new_time new_speed 2;
-      let new_state =
-        third_runge_kutta current_state current_time derivative dt
-      in
-      plot_loop (current_time +. dt) new_state
+let get_data_PC initial_state t_i derivative dt final_t eps =
+  let initial_speed, initial_position = initial_state in
+  let acc = [ (t_i, initial_position, initial_speed) ] in
+  let t_i = t_i +. dt in
+  let ((p1_speed, p1_position) as s1) =
+    fourth_runge_kutta initial_state t_i derivative dt
   in
-  plot_loop t_i initial_state;
-  let _ = Graphics.read_key () in
-  ()
-
-let plot_function_fst_PC initial_state t_i derivative dt final_t eps =
-  Graphics.open_graph "";
-  let size_x = Graphics.size_x () and size_y = Graphics.size_y () in
-  let x_center, y_center = (size_x / 8, size_y / 2) in
-  (* Draw the Y line *)
-  Graphics.moveto x_center 0;
-  Graphics.lineto x_center size_y;
-  (* Draw the X line *)
-  Graphics.moveto 0 y_center;
-  Graphics.lineto size_x y_center;
-
-  let adjust_time t scale_factor =
-    int_of_float (t +. float_of_int x_center +. (t *. scale_factor))
-  and adjust_position y = int_of_float (y +. float_of_int y_center) in
-
-  let _, p1 = initial_state in
-
-  Printf.printf "[DEBUG]: TIME: %f; POSITION: %f\n" t_i p1;
+  let acc = (t_i, p1_position, p1_speed) :: acc in
   let t_i = t_i +. dt in
-
-  let ((_, p1) as s1) = fourth_runge_kutta initial_state t_i derivative dt in
-  plot_square (adjust_time t_i 40.) (adjust_position p1) 2;
-  Printf.printf "[DEBUG]: TIME: %f; POSITION: %f\n" t_i p1;
+  let ((p2_speed, p2_position) as s2) =
+    fourth_runge_kutta s1 t_i derivative dt
+  in
+  let acc = (t_i, p2_position, p2_speed) :: acc in
   let t_i = t_i +. dt in
-
-  let ((_, p2) as s2) = fourth_runge_kutta s1 t_i derivative dt in
-  plot_square (adjust_time t_i 40.) (adjust_position p2) 2;
-  Printf.printf "[DEBUG]: TIME: %f; POSITION: %f\n" t_i p2;
-  let t_i = t_i +. dt in
-
-  let s3 = fourth_runge_kutta s2 t_i derivative dt in
+  let ((p3_speed, p3_position) as s3) =
+    fourth_runge_kutta s2 t_i derivative dt
+  in
+  let acc = (t_i, p3_position, p3_speed) :: acc in
 
   let rec plot_loop current_time state_0 state_1 state_2
-      ((_, current_position) as state_3) =
-    if current_time > final_t then ()
+      ((current_speed, current_position) as state_3) acc =
+    if current_time > final_t then List.rev acc
     else
-      let new_time = adjust_time current_time 40.
-      and new_position = adjust_position current_position in
-      Printf.printf "[DEBUG]: TIME: %f; POSITION: %f\n" current_time
-        current_position;
-      plot_square new_time new_position 2;
       let new_state =
         predictor_corrector state_0 state_1 state_2 state_3 current_time
           derivative dt eps
       in
       plot_loop (current_time +. dt) state_1 state_2 state_3 new_state
+        ((current_time, current_position, current_speed) :: acc)
   in
-  plot_loop t_i initial_state s1 s2 s3;
-  let _ = Graphics.read_key () in
-  ()
-
-let plot_function_snd_PC initial_state t_i derivative dt final_t eps =
-  Graphics.open_graph "";
-  let size_x = Graphics.size_x () and size_y = Graphics.size_y () in
-  let x_center, y_center = (size_x / 8, size_y / 2) in
-  (* Draw the Y line *)
-  Graphics.moveto x_center 0;
-  Graphics.lineto x_center size_y;
-  (* Draw the X line *)
-  Graphics.moveto 0 y_center;
-  Graphics.lineto size_x y_center;
-
-  let adjust_time t scale_factor =
-    int_of_float (t +. float_of_int x_center +. (t *. scale_factor))
-  and adjust_speed y = int_of_float (y +. float_of_int y_center) in
-
-  let p1, _ = initial_state in
-
-  Printf.printf "[DEBUG]: TIME: %f; SPEED: %f\n" t_i p1;
-  let t_i = t_i +. dt in
-
-  let ((p1, _) as s1) = fourth_runge_kutta initial_state t_i derivative dt in
-  plot_square (adjust_time t_i 40.) (adjust_speed p1) 2;
-  Printf.printf "[DEBUG]: TIME: %f; SPEED: %f\n" t_i p1;
-  let t_i = t_i +. dt in
-
-  let ((p2, _) as s2) = fourth_runge_kutta s1 t_i derivative dt in
-  plot_square (adjust_time t_i 40.) (adjust_speed p2) 2;
-  Printf.printf "[DEBUG]: TIME: %f; SPEED: %f\n" t_i p2;
-  let t_i = t_i +. dt in
-
-  let s3 = fourth_runge_kutta s2 t_i derivative dt in
-
-  let rec plot_loop current_time state_0 state_1 state_2
-      ((current_speed, _) as state_3) =
-    if current_time > final_t then ()
-    else
-      let new_time = adjust_time current_time 40.
-      and new_position = adjust_speed current_speed in
-      Printf.printf "[DEBUG]: TIME: %f; SPEED: %f\n" current_time current_speed;
-      plot_square new_time new_position 2;
-      let new_state =
-        predictor_corrector state_0 state_1 state_2 state_3 current_time
-          derivative dt eps
-      in
-      plot_loop (current_time +. dt) state_1 state_2 state_3 new_state
-  in
-  plot_loop t_i initial_state s1 s2 s3;
-  let _ = Graphics.read_key () in
-  ()
+  plot_loop t_i initial_state s1 s2 s3 acc

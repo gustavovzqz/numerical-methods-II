@@ -1,4 +1,0 @@
-(executable
- (public_name t13)
- (name main)
- (libraries numerical))
