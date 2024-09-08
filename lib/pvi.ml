@@ -81,7 +81,7 @@ let predictor_corrector s0 s1 s2 s3 t_i derivative dt eps =
 let get_data_RK initial_state t_i derivative dt final_t =
   let rec plot_loop current_time
       ((current_speed, current_position) as current_state) acc =
-    if current_time > final_t then List.rev acc
+    if current_time > final_t then acc
     else
       let new_state =
         third_runge_kutta current_state current_time derivative dt
@@ -112,7 +112,7 @@ let get_data_PC initial_state t_i derivative dt final_t eps =
 
   let rec plot_loop current_time state_0 state_1 state_2
       ((current_speed, current_position) as state_3) acc =
-    if current_time > final_t then List.rev acc
+    if current_time > final_t then acc
     else
       let new_state =
         predictor_corrector state_0 state_1 state_2 state_3 current_time
