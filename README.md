@@ -4,8 +4,8 @@ This project implements various numerical methods, organized into units. Each un
 
 ## Technologies Used
 
-- Units 1 and 2 are implemented in **Python** and **C++**.
-- Units 3, 4, and 5 are implemented in **OCaml**.
+- Units 1 and 2 were implemented in **Python** and **C++**.
+- Units 3, 4, and 5 were implemented in **OCaml**.
 
 ## Unit Structure
 
