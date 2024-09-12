@@ -26,12 +26,9 @@ The project is divided into five main units, each containing several implemented
 - Inverse Power Method
 - Shifted Power Method
 - Householder Method
-- Jacobi Method
 - QR Method
 
 ### Unit 4: Differential Equations
-- Explicit Euler Method
-- Implicit Euler Method
 - Runge-Kutta Method
 - Predictor-Corrector Method
 
